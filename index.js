@@ -7,14 +7,56 @@ const app = express()
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
 
+app.use(express.urlencoded({extended:true}))
+
+const readFile = (filename) =>{
+    return new Promise((resolve, reject) => { 
+        fs.readFile(filename, "utf-8", (error, data) =>{
+            if (error){
+                console.error(error)
+                return
+            } 
+            const tasks = JSON.parse(data)
+            resolve(tasks)
+        })
+    })
+} 
+
 app.get('/', (req, res) => {
-    fs.readFile('./tasks', 'utf-8', (error, data) => {
-        if (error) {
-            console.error(error)
-            return
+    readFile('./tasks.json')
+        .then(tasks =>{
+            console.log(tasks)
+            res.render('index', {tasks: tasks})
+        })
+    })
+
+app.post('/', (req, res) =>{
+    readFile('./tasks.json')
+    .then(tasks =>{
+        let index
+        if(tasks.length === 0)
+        {
+            index = 0
+        } else {
+            index = tasks[tasks.length-1].id +1; 
+        }  
+        const newTask = {
+            "id" : index,
+            "task" :req.body.task
         } 
-        const tasks = data.split('\n')
-        res.render('index', {tasks: tasks})
+        console.log(newTask)
+        tasks.push(newTask)
+        data = JSON.stringify(tasks, null, 2)
+        console.log(data)
+        fs.writeFile('./tasks', data, 'utf-8', err =>{
+            if (err){
+                console.error(err)
+                return
+            } else {
+                console.log('saved')
+            } 
+            res.redirect('/')
+        })
     })
 })
 
