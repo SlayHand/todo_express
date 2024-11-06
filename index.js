@@ -59,7 +59,7 @@ app.post('/', (req, res) =>{
         })
     })
 })
-app.get('/delete-task/:taskId', (reg,res) =>{
+app.get('/delete-task/:taskId', (req,res) =>{
     let deletedTaskId = parseInt (req.params.taskId)
     readFile('./tasks.json')
     .then(tasks => {
