@@ -23,7 +23,7 @@ const readFile = (filename) =>{
 } 
 const writeFile = (filename, data) =>{
     return new Promise((resolve, reject) => { 
-        fs.writeFile(filename, "utf-8", error, data =>{
+        fs.writeFile(filename, data, "utf-8", error=>{
             if (error){
                 console.error(error);
                 return;
@@ -34,15 +34,28 @@ const writeFile = (filename, data) =>{
 } 
 app.get('/', (req, res) => {
     readFile('./tasks.json')
-        .then(tasks =>{
-            console.log(tasks)
-            res.render('index', {tasks: tasks})
+        .then(tasks => {
+            res.render('index', {
+                tasks: tasks,
+                error: null
+            })
         })
     })
 
 app.post('/', (req, res) =>{
+    let error = null 
+    if (req.body.task.trim().length == 0){
+        error = 'Please insert correct task data'
     readFile('./tasks.json')
-    .then(tasks =>{
+    .then (tasks => {
+        res.render('index', {
+            tasks: tasks,
+            error: error
+        })
+    })
+  }  else {
+        readFile('./tasks.json')
+    .then(tasks => {
         let index
         if(tasks.length === 0)
         {
@@ -56,10 +69,10 @@ app.post('/', (req, res) =>{
         } 
         tasks.push(newTask)
         data = JSON.stringify(tasks, null, 2)
-        console.log(data)
-            writeFile('tasks.json', data)
-            res.redirect('/')
-        })
+        writeFile('./tasks.json', data)
+        res.redirect('/')
+         })
+        } 
     })
 app.get('/delete-task/:taskId', (req,res) =>{
     let deletedTaskId = parseInt (req.params.taskId)
@@ -71,16 +84,17 @@ app.get('/delete-task/:taskId', (req,res) =>{
             } 
         })
         data = JSON.stringify(tasks, null, 2)
-        fs.writeFile('tasks.json', data => {
-            if (err){
-                console.error(err);
-                return;
-            }
-            res.redirect('/') 
+        writeFile('./tasks.json', data)
+        res.redirect('/') 
         })
-    })
 })
 
+app.get ('/delete-tasks', (req, res) =>{
+    data = JSON.stringify([] , null, 2)
+    writeFile('./tasks.json', data)
+    res.redirect('/') 
+
+})  
 app.listen(3001, () => {
     console.log('Server started at http://localhost:3001')
 })
