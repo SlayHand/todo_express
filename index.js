@@ -21,7 +21,17 @@ const readFile = (filename) =>{
         })
     })
 } 
-
+const writeFile = (filename, data) =>{
+    return new Promise((resolve, reject) => { 
+        fs.writeFile(filename, "utf-8", error, data =>{
+            if (error){
+                console.error(error);
+                return;
+            } 
+            resolve(true)
+        })
+    })
+} 
 app.get('/', (req, res) => {
     readFile('./tasks.json')
         .then(tasks =>{
@@ -44,21 +54,13 @@ app.post('/', (req, res) =>{
             "id" : index,
             "task" :req.body.task
         } 
-        console.log(newTask)
         tasks.push(newTask)
         data = JSON.stringify(tasks, null, 2)
         console.log(data)
-        fs.writeFile('./tasks', data, 'utf-8', err =>{
-            if (err){
-                console.error(err)
-                return
-            } else {
-                console.log('saved')
-            } 
+            writeFile('tasks.json', data)
             res.redirect('/')
         })
     })
-})
 app.get('/delete-task/:taskId', (req,res) =>{
     let deletedTaskId = parseInt (req.params.taskId)
     readFile('./tasks.json')
@@ -69,7 +71,7 @@ app.get('/delete-task/:taskId', (req,res) =>{
             } 
         })
         data = JSON.stringify(tasks, null, 2)
-        fs.writeFile('./tasks.json', data, 'utf-8', err => {
+        fs.writeFile('tasks.json', data => {
             if (err){
                 console.error(err);
                 return;
