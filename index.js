@@ -74,6 +74,46 @@ app.post('/', (req, res) =>{
          })
         } 
     })
+    app.get('/update-task/:taskId', (req, res) => {
+        const taskId = parseInt(req.params.taskId); 
+        readFile('./tasks.json')
+            .then(tasks => {
+                const taskToUpdate = tasks.find(task => task.id === taskId);
+                if (!taskToUpdate) {
+                    return res.status(404).send("Task not found");
+                }
+                res.render('update', { task: taskToUpdate }); 
+            })
+            .catch(error => {
+                console.error(error);
+                res.status(500).send("Error reading tasks");
+            })
+    });
+    app.post('/update-task/:taskId', (req, res) => {
+        const taskId = parseInt(req.params.taskId);
+        const updatedTaskText = req.body.task.trim();
+    
+        if (updatedTaskText.length === 0) {
+            return res.redirect(`/update-task/${taskId}?error=Invalid%20task%20data`);
+        }
+    
+        readFile('./tasks.json')
+            .then(tasks => {
+                const taskIndex = tasks.findIndex(task => task.id === taskId);
+                if (taskIndex === -1) {
+                    return res.status(404).send("Task not found");
+                }
+                tasks[taskIndex].task = updatedTaskText;
+                const data = JSON.stringify(tasks, null, 2);
+                return writeFile('./tasks.json', data);
+            })
+            .then(() => res.redirect('/'))
+            .catch(error => {
+                console.error(error);
+                res.status(500).send("Error updating task");
+            })
+    })
+
 app.get('/delete-task/:taskId', (req,res) =>{
     let deletedTaskId = parseInt (req.params.taskId)
     readFile('./tasks.json')
@@ -88,6 +128,8 @@ app.get('/delete-task/:taskId', (req,res) =>{
         res.redirect('/') 
         })
 })
+
+
 
 app.get ('/delete-tasks', (req, res) =>{
     data = JSON.stringify([] , null, 2)

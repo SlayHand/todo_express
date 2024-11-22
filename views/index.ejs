@@ -40,12 +40,16 @@
                         <% tasks.forEach(task => { %>
                         <li class="collection-item">
                           <%= task.task %>
-                          <a href="delete-task/<%= task.id %>" class="secondary-content"><i class="material-icons">delete</i></a>
+                          <a href="/update-task/<%= task.id %>" class="secondary-content">
+                            <i class="material-icons">create</i>
+                          </a>
+                          <a href="delete-task/<%= task.id %>" class="secondary-content">
+                            <i class="material-icons">delete</i></a>
                         </li>
                      
                     <% }) %> 
                  </ul>
-                 <a href="/delete-tasks" class="btn">Clear all</a>
+                 <a href= "/delete-tasks" class="btn">Clear all</a>
                   
                 </div>
               </div>
